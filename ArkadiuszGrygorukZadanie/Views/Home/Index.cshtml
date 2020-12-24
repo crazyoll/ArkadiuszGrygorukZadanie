@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<script src="~/Scripts/ForIndex.js" type="text/javascript"></script>
+
+<div style="overflow:auto">
+    <div style=" float: left; text-align: center; vertical-align: middle;margin-top: 10px">
+        <h4>@Html.ActionLink("Create", "Create") Or </h4>
+    </div>
+    <div class="demo-section k-content" style=" float: left; overflow:auto; margin: 10px;">
+        <h4>Search for movie</h4>
+        @(Html.Kendo().AutoComplete()
+              .Name("Moves")
+              .DataTextField("Title")
+              .DataSource(source => source
+                .Custom()
+                .Transport(transport => transport
+                    .Read(read =>
+                    {
+                        read.Action("MovieSearchResult", "Home").Data("onAdditionalData");
+                    })
+                )
+              )
+              .Events(e =>
+              {
+                  e.Filtering("onFilteringBar").Select("onSelectBar");
+              })
+              .HtmlAttributes(new { style = "width:980px;" })
+              .Placeholder("Type move name here...")
+              .Filter("startswith")
+              .MinLength(1)
+              .Height(400)
+              .HeaderTemplate("<div class=\"dropdown-header k-widget k-header\">" +
+                            "<span>Search result</span>" +
+                        "</div>")
+              .FooterTemplate("Total <strong>#: instance.dataSource.total() #</strong> items found")
+              .Template("<img class='imageMini' src='#: ImageUrl #' />" +
+                        "<span class=\"k-state-default\"><h3>#: Title #</h3></span>")
+        )
+    </div>
+</div>
+<div>
+    @(Html.Kendo().Grid<ArkadiuszGrygorukZadanie.Models.Move>()
+      .Name("grid")
+      .Columns(columns =>
+      {
+          columns.Bound(c => c.ImageUrl).Width("20%").Title("Image");
+          columns.Bound(c => c.Title).Width("10%");
+          columns.Bound(c => c.ReleaseDate).Width("10%");
+          columns.Bound(c => c.Rating).Width("10%");
+          columns.Bound(c => c.Description);
+      })
+      .ClientRowTemplate(
+        "<tr data-uid='#: Id #'>" +
+            "<td >" +
+               "<img class='image' src='#: ImageUrl #' />" +
+            "</td>" +
+            "<td>" +
+                "<span>#: Title #</span>" +
+            "</td>" +
+            "<td>" +
+                "<span>#: ReleaseDate #</span>" +
+            "</td>" +
+            "<td>" +
+                "<span>#: Rating #</span>" +
+            "</td>" +
+            "<td>" +
+                "<span>#: Description #</span>" +
+            "</td>" +
+         "</tr>"
+      )
+      .Events(e =>
+      {
+          e.Change("onChangeGrid");
+      })
+      .Sortable(sortable =>
+      {
+          sortable.SortMode(GridSortMode.SingleColumn);
+      })
+      //.ToolBar(toolbar => { toolbar.Search(); })
+      .Scrollable()
+      .Height(600)
+      .Selectable(selectable => selectable
+          .Mode(GridSelectionMode.Multiple)
+          .Type(GridSelectionType.Row))
+      .DataSource(dataSource => dataSource
+          .Ajax()
+          .Read(read => read.Action("Moves_Read", "Home"))  
+      )
+    )
+</div>
+
